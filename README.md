@@ -79,5 +79,16 @@ streamlit run app.py
 
 ---
 
+## 🤝 Contributing
+
+We welcome contributions! If you'd like to help **add support for more languages**, please follow these steps:
+
+1. **Fork the repository** and clone it locally.
+2. **Train a new model** or update the existing one to include additional languages.
+3. **Test your changes** to ensure predictions work correctly.
+4. **Create a pull request** with a clear description of the added languages and any changes made.
+
+Your contributions will make this app more powerful and inclusive! 🌍✨
+
  ## ❤️ Author
  - Made with ❤️ by OmegaKavya
