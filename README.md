@@ -71,7 +71,9 @@ streamlit run app.py
 - omegakavya.jpeg – Sidebar image (optional)
 
 ---
-
+## Live Hosted at :
+- https://language-detection-project.streamlit.app/
+---
  ## ⚠️ Notes
  - This is a basic ML model.
  - Works strongly for major languages only.
