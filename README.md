@@ -2,7 +2,6 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.29-orange.svg)](https://streamlit.io/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 A simple **Machine Learning-based language detection** web app built with **Streamlit**. Type or paste text and instantly detect its language.  
 
