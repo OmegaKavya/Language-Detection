@@ -61,15 +61,20 @@ streamlit run app.py
 
 5. Open the app in your browser at the link provided by Streamlit.
 
+-- 
 ## 📁 Files
-	•	app.py – Streamlit application code
-	•	language_detection_model.pkl – Trained ML model
-	•	omegakavya.jpeg – Sidebar image (optional)
+- app.py – Streamlit application code
+- language_detection_model.pkl – Trained ML model
+- omegakavya.jpeg – Sidebar image (optional)
+
+--
 
  ## ⚠️ Notes
- 	•	This is a basic ML model.
-	•	Works strongly for major languages only.
-	•	Deep learning upgrade coming soon for better performance and wider language support.
+ - This is a basic ML model.
+ - Works strongly for major languages only.
+ - Deep learning upgrade coming soon for better performance and wider language support.
+
+--
 
  ## ❤️ Author
  - Made with ❤️ by OmegaKavya
