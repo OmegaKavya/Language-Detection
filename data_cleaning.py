@@ -15,6 +15,7 @@ str.isalpha is Unicode aware, so the rule below keeps letters in any script
 and still drops digits, punctuation and symbols.
 """
 import re
+import unicodedata
 
 import pandas as pd
 
@@ -22,10 +23,22 @@ INPUT_FILE = "Language Detection.csv"
 OUTPUT_FILE = "Language_Detection_Cleaned.csv"
 
 
+def _is_letter(ch):
+    """Letters, and the marks that attach to them.
+
+    str.isalpha alone is not enough. Indic scripts write vowels and the virama
+    as combining marks, Unicode categories Mn and Mc, for which isalpha is
+    False. Dropping them silently removed 44% of the characters in Tamil,
+    Kannada, Malayalam and Hindi: still enough for the classifier to work,
+    which is exactly why it would have gone unnoticed without a test.
+    """
+    return ch.isalpha() or unicodedata.category(ch).startswith("M")
+
+
 def preprocess_text(text):
-    """Lowercase, keep letters in any script, drop everything else."""
+    """Lowercase, keep letters and their marks in any script, drop the rest."""
     text = str(text).lower()
-    text = "".join(ch for ch in text if ch.isalpha() or ch.isspace())
+    text = "".join(ch for ch in text if _is_letter(ch) or ch.isspace())
     return re.sub(r"\s+", " ", text).strip()
 
 

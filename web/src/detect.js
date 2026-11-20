@@ -29,13 +29,18 @@ export function loadModel(raw) {
   };
 }
 
-/** Lowercase, keep letters in any script, collapse whitespace. */
+// Letters, plus the combining marks that attach to them. \p{M} is the part
+// that matters: Indic scripts write vowels and the virama as marks, and
+// dropping them removes 44% of the characters in Tamil, Kannada, Malayalam
+// and Hindi. This has to match data_cleaning._is_letter exactly, or the
+// browser and the training pipeline are cleaning differently again.
+const KEEP = /[\p{L}\p{M}\s]/u;
+
+/** Lowercase, keep letters and their marks in any script, collapse space. */
 export function preprocess(text) {
   let out = "";
   for (const ch of String(text).toLowerCase()) {
-    // \p{L} is Unicode letters, matching Python's str.isalpha closely enough
-    // for this purpose; whitespace is kept and collapsed below.
-    if (/\p{L}/u.test(ch) || /\s/.test(ch)) out += ch;
+    if (KEEP.test(ch)) out += ch;
   }
   return out.replace(/\s+/g, " ").trim();
 }
