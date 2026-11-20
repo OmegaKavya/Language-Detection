@@ -1,60 +1,55 @@
-import pandas as pd
+"""Clean the dataset without deleting most of it.
+
+The original cleaner ran re.sub(r'[^a-z\\s]', '', text), which keeps only
+lowercase ASCII letters. For a dataset of seventeen languages that is not a
+cleaning step, it is a filter: it removed 98.1% of Tamil rows, 96.2% of
+Kannada, 95.6% of Malayalam, 92.7% of Arabic, 89.0% of Greek, 85.4% of
+Russian and 79.4% of Hindi, leaving empty strings behind. 27.5% of the corpus
+became blank, and every blanked row belonged to a non-Latin script.
+
+The model was then asked to tell those seven languages apart from nothing,
+and scored exactly 0% on all of them while reporting 66% overall, because the
+ten Latin-script languages carried the average.
+
+str.isalpha is Unicode aware, so the rule below keeps letters in any script
+and still drops digits, punctuation and symbols.
+"""
 import re
 
+import pandas as pd
+
+INPUT_FILE = "Language Detection.csv"
+OUTPUT_FILE = "Language_Detection_Cleaned.csv"
+
+
 def preprocess_text(text):
-    """
-    Cleans a single text string by lowercasing, removing numbers, 
-    punctuation, and extra whitespace.
-    
-    Args:
-        text (str): The input string to clean.
-        
-    Returns:
-        str: The cleaned string.
-    """
-    # Your code here:
-    # 1. Convert text to lowercase
-    text = text.lower()
-    # 2. Use regex to remove numbers
-    text = re.sub(r'\d+', '', text)
-    # 3. Use regex to remove punctuation and special characters
-    text = re.sub(r'[^a-z\s]', '', text)
-    # 4. Remove extra whitespace
-    text = re.sub(r'\s+', ' ', text).strip()    
-    cleaned_text = text # Replace this with your actual cleaned text
-    return cleaned_text
+    """Lowercase, keep letters in any script, drop everything else."""
+    text = str(text).lower()
+    text = "".join(ch for ch in text if ch.isalpha() or ch.isspace())
+    return re.sub(r"\s+", " ", text).strip()
 
 
-# --- Main execution block ---
+def main():
+    data = pd.read_csv(INPUT_FILE).dropna(subset=["Text", "Language"])
+    data["Text"] = data["Text"].astype(str).str.strip()
+
+    # Exact duplicates would otherwise straddle the train/test split and
+    # inflate the score on both sides of it.
+    before = len(data)
+    data = data.drop_duplicates(subset=["Text"])
+    print(f"dropped {before - len(data)} duplicate texts")
+
+    data["Text"] = data["Text"].apply(preprocess_text)
+
+    blank = (data["Text"].str.len() == 0).sum()
+    if blank:
+        print(f"warning: {blank} rows are empty after cleaning")
+    data = data[data["Text"].str.len() > 0]
+
+    data.to_csv(OUTPUT_FILE, index=False)
+    print(f"wrote {len(data)} rows to {OUTPUT_FILE}")
+    print(data.groupby("Language").size().to_string())
+
+
 if __name__ == "__main__":
-    # Define file paths
-    INPUT_FILE = 'Language Detection.csv'
-    OUTPUT_FILE = 'Language_Detection_Cleaned.csv'
-    
-    print("Starting data cleaning process...")
-    
-    # 1. Load the data
-    try:
-        data = pd.read_csv(INPUT_FILE)
-        print(f"Successfully loaded {INPUT_FILE}")
-    except FileNotFoundError:
-        print(f"Error: {INPUT_FILE} not found. Please place it in the correct directory.")
-        exit() # Exit the script if the file isn't there
-
-    # 2. Handle missing values
-    # Your code here: Drop rows with any null values.
-    data = data.dropna()
-    
-    # 3. Apply the cleaning function to the 'Text' column
-    data['Text'] = data['Text'].apply(preprocess_text)
-    # Ensure the 'Text' column is treated as string type to avoid errors
-    print("Cleaning text data...")
-    # data['Text'] = ... your code here ...
-    
-    
-    # 4. Save the cleaned data
-    # Hint: Use the .to_csv() method. Remember to set index=False.
-    # Your code here...
-    data.to_csv(OUTPUT_FILE,index=False)
-    
-    print(f"Data cleaning complete. Cleaned data saved to {OUTPUT_FILE}")
+    main()

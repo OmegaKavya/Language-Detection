@@ -1,104 +1,74 @@
+"""Train the language detector and report per language, not just overall.
+
+Two settings here are deliberate and were measured, not assumed.
+
+fit_prior=False gives every language the same prior. With fitted priors the
+classifier inherits the corpus imbalance, and once the cleaner stopped
+deleting non-Latin scripts the feature space grew from ASCII to 44,000
+character n-grams. Laplace smoothing then spread so much mass across that
+space that small classes could not win: German fell to 16% and three quarters
+of its test rows were predicted English, which has the most training data.
+A language detector has no business assuming English is more likely.
+
+alpha=0.01 reduces that smoothing. At the default of 1.0 the same collapse
+happens more mildly.
+
+Overall accuracy is reported last and on purpose. The original model reported
+66% while scoring zero on seven of its seventeen languages, so the headline
+number was the thing hiding the fault.
+"""
+import os
+import pickle
+
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import accuracy_score, classification_report
-import pickle
-import os
 
-def train_and_save_model(data_path, model_path):
-    """
-    Loads the dataset, trains a language detection model, and saves it using pickle.
+DATA_PATH = "Language_Detection_Cleaned.csv"
+MODEL_PATH = "language_detection_model.pkl"
 
-    Args:
-        data_path (str): Path to the cleaned CSV file with 'Text' and 'Language' columns.
-        model_path (str): Path to save the trained model.
 
-    Returns:
-        tuple: (accuracy, classification_report_str)
-    """
-    # Ensure paths are absolute
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(script_dir, data_path)
-    model_path = os.path.join(script_dir, model_path)
-
-    # Check if dataset exists
-    if not os.path.exists(data_path):
-        raise FileNotFoundError(f"Data file not found: {data_path}")
-
-    # Step 1: Load the dataset
-    data = pd.read_csv(data_path)
-    data = data.dropna(subset=['Text', 'Language'])  # Drop missing values
-
-    # Step 2: Define features (X) and labels (y)
-    X = data['Text'].astype(str)
-    y = data['Language']
-
-    # Step 3: Split the dataset
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-
-    # Step 4: Create a pipeline with TF-IDF + Naive Bayes
-    pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(analyzer='char', ngram_range=(1, 3))),
-        ('clf', MultinomialNB())
+def build_pipeline():
+    return Pipeline([
+        ("tfidf", TfidfVectorizer(analyzer="char", ngram_range=(1, 3), sublinear_tf=True)),
+        ("clf", MultinomialNB(alpha=0.01, fit_prior=False)),
     ])
 
-    # Step 5: Train the model
-    pipeline.fit(X_train, y_train)
 
-    # Step 6: Evaluate the model
+def train_and_save_model(data_path=DATA_PATH, model_path=MODEL_PATH):
+    here = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(here, data_path)
+    model_path = os.path.join(here, model_path)
+
+    data = pd.read_csv(data_path).dropna(subset=["Text", "Language"])
+    X, y = data["Text"].astype(str), data["Language"]
+
+    # Stratified, so a small class like Hindi cannot land mostly on one side.
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    pipeline = build_pipeline().fit(X_train, y_train)
     y_pred = pipeline.predict(X_test)
+
+    report = classification_report(y_test, y_pred, zero_division=0)
     accuracy = accuracy_score(y_test, y_pred)
-    report = classification_report(y_test, y_pred)
 
-    # Step 7: Save model with pickle
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-    with open(model_path, "wb") as f:
-        pickle.dump(pipeline, f)
+    per_class = pd.DataFrame({"actual": y_test, "ok": y_pred == y_test})
+    worst = (per_class.groupby("actual").ok.mean() * 100).sort_values()
+    print("Per language accuracy, worst first:")
+    print(worst.round(1).to_string())
+    print(f"\nWorst class: {worst.index[0]} at {worst.iloc[0]:.1f}%")
+    print(f"Overall: {100 * accuracy:.1f}%")
 
+    with open(model_path, "wb") as handle:
+        pickle.dump(pipeline, handle)
+    print(f"saved {model_path}")
     return accuracy, report
 
 
-# --- Main execution block ---
 if __name__ == "__main__":
-    # File paths
-    CLEAN_DATA_FILE = 'Language_Detection_Cleaned.csv'
-    MODEL_OUTPUT_FILE = 'language_detection_model.pkl'
-
-    # Train and save the model
-    model_accuracy, model_report = train_and_save_model(CLEAN_DATA_FILE, MODEL_OUTPUT_FILE)
-
-    # Print results
-    print("\n--- Training Complete ---")
-    print(f"Model saved to: {MODEL_OUTPUT_FILE}")
-    print(f"Model Accuracy on Test Data: {model_accuracy:.4f}")
-
-    print("\n--- Classification Report ---")
-    print(model_report)
-
-    # Demonstrate predictions using the saved model
-    print("\n--- Testing the saved model with sample inputs ---")
-    if os.path.exists(MODEL_OUTPUT_FILE):
-        with open(MODEL_OUTPUT_FILE, "rb") as f:
-            loaded_model = pickle.load(f)
-
-        sample_inputs = [
-            "This is a test of the language detection system.",  # English
-            "Ceci est un test du système de détection de langue.",  # French
-            "Este es un sistema de prueba de detección de idioma.",  # Spanish
-            "Это тест системы определения языка.",  # Russian
-            "هذا اختبار لنظام كشف اللغة",  # Arabic
-            "Questo è un test del sistema di rilevamento della lingua.",  # Italian
-            "Dit is een test van het taaldetectiesysteem."  # Dutch
-        ]
-
-        predictions = loaded_model.predict(sample_inputs)
-
-        for i, text in enumerate(sample_inputs):
-            print(f"Input: '{text}'")
-            print(f"--> Predicted Language: {predictions[i]}\n")
-    else:
-        print(f"Error: Model file '{MODEL_OUTPUT_FILE}' not found. Cannot run demonstration.")
+    train_and_save_model()

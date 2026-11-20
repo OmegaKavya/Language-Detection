@@ -1,5 +1,6 @@
 import streamlit as st
 import pickle
+from data_cleaning import preprocess_text
 
 # -------------------- Load trained model --------------------
 with open("language_detection_model.pkl", "rb") as f:
@@ -146,8 +147,16 @@ if st.button("🚀 Detect Language"):
     if user_input.strip() == "":
         st.warning("⚠️ Please enter some text.")
     else:
-        prediction = model.predict([user_input])[0]
-        st.markdown(f'<div class="result-box">🌐 Predicted Language: {prediction}</div>', unsafe_allow_html=True)
+        # The model is trained on cleaned text, so inference has to clean the
+        # input the same way. This line previously passed the raw box contents
+        # straight in, which is a different distribution from anything the
+        # model was fitted on.
+        cleaned = preprocess_text(user_input)
+        if not cleaned:
+            st.warning("⚠️ That input has no letters in it.")
+        else:
+            prediction = model.predict([cleaned])[0]
+            st.markdown(f'<div class="result-box">🌐 Predicted Language: {prediction}</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
