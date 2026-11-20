@@ -13,6 +13,12 @@ A language detector has no business assuming English is more likely.
 alpha=0.01 reduces that smoothing. At the default of 1.0 the same collapse
 happens more mildly.
 
+max_features=20000 caps the vocabulary. It was measured against the full
+44,157 features and is not a compromise: it scores slightly higher overall
+and raises the worst class from 94.1% to 96.5%, because the discarded tail is
+mostly n-grams seen a handful of times. It also makes the model small enough
+to export and run in a browser, which is how it is served.
+
 Overall accuracy is reported last and on purpose. The original model reported
 66% while scoring zero on seven of its seventeen languages, so the headline
 number was the thing hiding the fault.
@@ -33,7 +39,8 @@ MODEL_PATH = "language_detection_model.pkl"
 
 def build_pipeline():
     return Pipeline([
-        ("tfidf", TfidfVectorizer(analyzer="char", ngram_range=(1, 3), sublinear_tf=True)),
+        ("tfidf", TfidfVectorizer(analyzer="char", ngram_range=(1, 3), sublinear_tf=True,
+                                  max_features=20000)),
         ("clf", MultinomialNB(alpha=0.01, fit_prior=False)),
     ])
 

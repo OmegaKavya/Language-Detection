@@ -1,0 +1,141 @@
+/* A type specimen rather than a dashboard. The subject is writing systems, so
+   the page is built around letterforms: a serif with real contrast for
+   display, a monospace wherever the model's own machinery is shown, and ink
+   that is warm rather than pure white.
+
+   The two result colours were checked rather than chosen: the before/after
+   pair separates by dE 16.7 at worst under deuteranopia, protanopia and
+   tritanopia, in both themes, and each clears 3.8:1 on its own ground. */
+:root {
+  --bg: #11131c;
+  --bg-2: #171a26;
+  --panel-top: rgba(32, 36, 54, 0.55);
+  --panel-bottom: rgba(17, 19, 28, 0.65);
+
+  --accent: #8b7bff;
+  --accent-bright: #b5a9ff;
+  --accent-deep: #5a4acc;
+
+  --good: #46c9a0;
+  --bad: #e0566b;
+
+  --text: #eceaf4;
+  --text-2: #b4b1c6;
+  --text-3: #7d7a92;
+  --rule: rgba(139, 123, 255, 0.24);
+  --rule-soft: rgba(139, 123, 255, 0.11);
+
+  --display: "Fraunces", Georgia, serif;
+  --sans: "Inter", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --radius: 10px;
+  --grain: 0.33;
+  --grain-blend: overlay;
+  --wash: 1;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f6f5f2;
+    --bg-2: #efedea;
+    --panel-top: rgba(255, 255, 255, 0.72);
+    --panel-bottom: rgba(246, 245, 242, 0.78);
+    --accent: #5a45d6;
+    --accent-bright: #7a66ee;
+    --accent-deep: #3d2ea3;
+    --good: #1f8c6b;
+    --bad: #c0344b;
+    --text: #15141c;
+    --text-2: #4a4858;
+    --text-3: #7a7788;
+    --rule: rgba(90, 69, 214, 0.26);
+    --rule-soft: rgba(90, 69, 214, 0.12);
+    --shadow: 0 16px 40px rgba(30, 25, 60, 0.1);
+    --grain: 0.2;
+    --grain-blend: multiply;
+    --wash: 0.5;
+    --input-bg: rgba(255, 255, 255, 0.72);
+  }
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f5f2; --bg-2: #efedea;
+  --panel-top: rgba(255, 255, 255, 0.72);
+  --panel-bottom: rgba(246, 245, 242, 0.78);
+  --accent: #5a45d6; --accent-bright: #7a66ee; --accent-deep: #3d2ea3;
+  --good: #1f8c6b; --bad: #c0344b;
+  --text: #15141c; --text-2: #4a4858; --text-3: #7a7788;
+  --rule: rgba(90, 69, 214, 0.26); --rule-soft: rgba(90, 69, 214, 0.12);
+  --shadow: 0 16px 40px rgba(30, 25, 60, 0.1);
+  --grain: 0.2; --grain-blend: multiply; --wash: 0.5;
+  --input-bg: rgba(255, 255, 255, 0.72);
+}
+
+* { box-sizing: border-box; }
+html, body, #root { min-height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before, body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+}
+
+body::before {
+  opacity: var(--wash);
+  background:
+    radial-gradient(68% 48% at 15% 0%, rgba(139, 123, 255, 0.2), transparent 62%),
+    radial-gradient(58% 44% at 88% 10%, rgba(70, 201, 160, 0.12), transparent 60%);
+}
+
+body::after {
+  opacity: var(--grain);
+  mix-blend-mode: var(--grain-blend);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 1.12; margin: 0; }
+a { color: var(--accent); }
+
+.shell { position: relative; z-index: 1; width: min(1080px, 100% - 2rem); margin: 0 auto; }
+
+.panel {
+  background: linear-gradient(180deg, var(--panel-top), var(--panel-bottom));
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: transform 350ms var(--ease), border-color 350ms var(--ease);
+}
+
+.panel:hover { transform: translateY(-2px); border-color: rgba(139, 123, 255, 0.4); }
+
+.panel h2 { font-size: 1.3rem; margin-bottom: 0.3rem; }
+.panel .note { color: var(--text-3); font-size: 0.85rem; margin: 0 0 1.1rem; }
+
+.eyebrow {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--accent);
+}
+
+.rule { height: 1px; border: 0; background: linear-gradient(90deg, transparent, var(--rule), transparent); margin: 0; }
+
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 600ms var(--ease), transform 600ms var(--ease); }
+.reveal.shown { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  .reveal { opacity: 1; transform: none; }
+}

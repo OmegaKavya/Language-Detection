@@ -1,9 +1,9 @@
-# macOS system files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
 .DS_Store
 
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.cache
+# Frontend build output and dependencies
+/web/node_modules/
+/web/dist/

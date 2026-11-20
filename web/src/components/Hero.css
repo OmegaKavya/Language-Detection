@@ -1,0 +1,53 @@
+.hero { position: relative; z-index: 1; padding: 4rem 0 2.5rem; text-align: center; }
+
+.hero-scripts {
+  display: flex; justify-content: center; flex-wrap: wrap; gap: 1.1rem;
+  margin: 0 0 1.4rem; font-family: var(--display); font-size: 1.5rem;
+  color: var(--text-3); opacity: 0.55;
+}
+
+.hero-scripts span { animation: script-in 700ms var(--ease) both; }
+.hero-scripts span:nth-child(2) { animation-delay: 60ms; }
+.hero-scripts span:nth-child(3) { animation-delay: 120ms; }
+.hero-scripts span:nth-child(4) { animation-delay: 180ms; }
+.hero-scripts span:nth-child(5) { animation-delay: 240ms; }
+.hero-scripts span:nth-child(6) { animation-delay: 300ms; }
+.hero-scripts span:nth-child(7) { animation-delay: 360ms; }
+.hero-scripts span:nth-child(8) { animation-delay: 420ms; }
+
+@keyframes script-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.hero h1 {
+  font-size: clamp(2.3rem, 6.5vw, 4rem);
+  letter-spacing: -0.015em;
+  animation: script-in 800ms var(--ease) both;
+  animation-delay: 160ms;
+}
+
+.hero-tag {
+  max-width: 52ch; margin: 1rem auto 0; color: var(--text-2); font-size: 1.02rem;
+  animation: script-in 800ms var(--ease) both; animation-delay: 260ms;
+}
+
+.hero-stats {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem; max-width: 860px; margin: 2.4rem auto 0;
+  animation: script-in 800ms var(--ease) both; animation-delay: 360ms;
+}
+
+.hero-stats div { display: grid; gap: 0.3rem; }
+
+.hero-stats dt {
+  font-family: var(--display); font-size: clamp(1.5rem, 3.2vw, 2.1rem);
+  font-weight: 700; line-height: 1.05;
+}
+
+.hero-stats dt.win { color: var(--accent-bright); }
+.hero-stats dt.fail { color: var(--bad); }
+
+.hero-stats dd {
+  margin: 0; font-size: 0.83rem; line-height: 1.45;
+  color: var(--text-2); max-width: 26ch; justify-self: center;
+}
+
+@media (max-width: 620px) { .hero-stats { grid-template-columns: 1fr; gap: 1.5rem; } }
