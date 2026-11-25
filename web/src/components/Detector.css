@@ -93,3 +93,17 @@
 .evidence-bar { display: block; height: 100%; background: linear-gradient(90deg, var(--good), var(--accent)); }
 
 @media (max-width: 760px) { .detector-result { grid-template-columns: 1fr; gap: 1.4rem; } }
+
+.highlighted { margin: 0.6rem 0 1rem; line-height: 1.9; font-size: 1rem; word-break: break-word; }
+.highlighted mark {
+  background: color-mix(in srgb, var(--accent, #16a37e) calc(var(--strength) * 45%), transparent);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0.05em 0;
+}
+.legacy { margin-top: 1.2rem; }
+.legacy-toggle { background: none; border: 1px solid currentColor; border-radius: 999px; padding: 0.35rem 0.9rem; font: inherit; font-size: 0.82rem; cursor: pointer; color: inherit; opacity: 0.85; }
+.legacy-toggle:hover { opacity: 1; }
+.legacy-body { margin-top: 0.7rem; }
+.legacy-text { font-family: ui-monospace, monospace; font-size: 0.9rem; padding: 0.6rem 0.8rem; border-radius: 6px; background: rgba(127, 127, 127, 0.1); word-break: break-word; }
+.legacy-text.empty { font-family: inherit; font-style: italic; opacity: 0.8; }

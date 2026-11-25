@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Panel from "./Panel.jsx";
 import { SAMPLES } from "../samples";
 import { label } from "../labels";
+import { highlightRuns, isCloseCall, legacyClean, legacyKept } from "../explain";
 import "./Detector.css";
 
 const pct = (v) => `${(100 * v).toFixed(1)}%`;
@@ -11,6 +12,7 @@ const pct = (v) => `${(100 * v).toFixed(1)}%`;
 // button; the result simply keeps up with the keyboard.
 export default function Detector({ model, detect }) {
   const [text, setText] = useState("");
+  const [showLegacy, setShowLegacy] = useState(false);
   const areaRef = useRef(null);
 
   useEffect(() => {
@@ -25,6 +27,13 @@ export default function Detector({ model, detect }) {
 
   const chars = text.trim().length;
   const thin = result && chars < 12;
+  const close = result && !thin && isCloseCall(result.ranked);
+  const runs = useMemo(
+    () => (result ? highlightRuns(result.cleaned, result.evidence) : []),
+    [result]
+  );
+  const legacy = useMemo(() => legacyClean(text), [text]);
+  const kept = useMemo(() => legacyKept(text), [text]);
 
   return (
     <Panel className="detector" aria-labelledby="detector-heading">
@@ -67,6 +76,15 @@ export default function Detector({ model, detect }) {
               {pct(result.confidence)} confident, against{" "}
               <b>{label(result.against)}</b> as the next best fit.
             </p>
+            {close && (
+              <p className="verdict-warn">
+                A close call: {label(result.ranked[0].language)} and{" "}
+                {label(result.ranked[1].language)} are within{" "}
+                {pct(result.ranked[0].probability - result.ranked[1].probability)} of
+                each other. Related languages share most of their n-grams, and
+                more text is what separates them.
+              </p>
+            )}
             {thin && (
               <p className="verdict-warn">
                 Only {chars} characters to go on. Short strings are genuinely
@@ -104,6 +122,11 @@ export default function Detector({ model, detect }) {
             bar is one n-gram's weight times the difference it makes between
             the two languages.
           </p>
+          <p className="highlighted" aria-label="The text as the model reads it, with the deciding sequences marked">
+            {runs.map((r, i) => (r.strength > 0
+              ? <mark key={i} style={{ "--strength": r.strength.toFixed(2) }}>{r.text}</mark>
+              : <span key={i}>{r.text}</span>))}
+          </p>
           <ul className="evidence-list">
             {result.evidence.slice(0, 8).map((e) => {
               const max = result.evidence[0].contribution || 1;
@@ -118,6 +141,25 @@ export default function Detector({ model, detect }) {
               );
             })}
           </ul>
+        </div>
+      )}
+      {text.trim() && (
+        <div className="legacy">
+          <button type="button" className="legacy-toggle" aria-expanded={showLegacy}
+            onClick={() => setShowLegacy((v) => !v)}>
+            {showLegacy ? "Hide" : "Show"} what the original model was given
+          </button>
+          {showLegacy && (
+            <div className="legacy-body">
+              <p className="evidence-note">
+                The first version cleaned text with <code>re.sub(r'[^a-z\s]', '', text)</code>.
+                For what you typed, it kept <b>{pct(kept)}</b> of the letters.
+              </p>
+              <p className={`legacy-text${legacy ? "" : " empty"}`}>
+                {legacy || "Nothing. The original model was given an empty string, and answered anyway."}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </Panel>
