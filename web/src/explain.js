@@ -81,13 +81,24 @@ export function highlightRuns(cleaned, evidence, top = 6) {
   return runs;
 }
 
+// The viramas Unicode treats as joining two consonants into one cluster
+// (Devanagari, Bengali, Gujarati, Oriya, Telugu, Malayalam). Gurmukhi, Tamil
+// and Kannada are left out because Intl.Segmenter does not join them either,
+// and the fallback should mark the same characters the browser would.
+const LINKER = String.raw`\u094D\u09CD\u0ACD\u0B4D\u0C4D\u0D4D`;
+// A zero width joiner, like a mark, belongs to the character before it.
+const EXTEND = String.raw`\p{M}\u200D`;
+const CLUSTER = new RegExp(
+  String.raw`[^${EXTEND}][${EXTEND}]*(?:(?<=[${LINKER}]\u200D?)\p{L}[${EXTEND}]*)*|[${EXTEND}]+`, "gu");
+
 function graphemes(text) {
   if (typeof Intl !== "undefined" && Intl.Segmenter) {
     return Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text), (g) => g.segment);
   }
-  // A mark stays with the letter before it; only a mark with no letter
-  // before it stands alone.
-  return text.match(/\P{M}\p{M}*|\p{M}+/gu) || [];
+  // A mark stays with the letter before it, a virama also takes the
+  // consonant after it (so "क्ष" is one cluster, not "क्" and "ष"), and only
+  // a mark with no letter before it stands alone.
+  return text.match(CLUSTER) || [];
 }
 
 /** True when the top two languages are too close to call with confidence. */

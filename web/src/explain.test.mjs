@@ -75,3 +75,28 @@ test("without Intl.Segmenter, a mark still stays with its letter", () => {
     Intl.Segmenter = segmenter;
   }
 });
+
+// Each word marked one code point at a time, so a cluster boundary that
+// differs anywhere changes some marking.
+const markings = (word) => [...new Set(Array.from(word))]
+  .map((c) => highlightRuns(word, [{ ngram: c, contribution: 1 }]));
+
+test("without Intl.Segmenter, conjuncts are marked as the browser would mark them", () => {
+  const words = [
+    "क्षत्रिय", "स्त्री", "राष्ट्र", "विद्यालय", "क्‍ष", "क् ष", // Hindi
+    "க்ஷத்திரியர்", "ஸ்ரீ", "பக்கம்", // Tamil
+    "ಕ್ಷತ್ರಿಯ", "ಸ್ತ್ರೀ", "ಪ್ರಕಾಶ", // Kannada
+    "ക്ഷത്രിയൻ", "സ്ത്രീ", "ന്‍", "മലയാളം", // Malayalam
+  ];
+  const expected = words.map(markings);
+  const segmenter = Intl.Segmenter;
+  delete Intl.Segmenter;
+  try {
+    words.forEach((word, i) => assert.deepStrictEqual(markings(word), expected[i], word));
+    // The case that was split: "क्ष" and "त्र" each in two pieces.
+    assert.deepStrictEqual(highlightRuns("क्षत्रिय", [{ ngram: "्", contribution: 1 }])
+      .map((r) => [r.text, r.strength]), [["क्षत्रि", 1], ["य", 0]]);
+  } finally {
+    Intl.Segmenter = segmenter;
+  }
+});
