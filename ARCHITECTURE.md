@@ -67,7 +67,7 @@ benefit.
 
 ## Evaluation
 
-Per language, never on the aggregate alone. The original model reported 66%
+Per language, never on the aggregate alone. The original model reported 91%
 while scoring exactly zero on seven of seventeen languages; an aggregate
 assertion would have passed. `tests/test_model.py` asserts a floor on the
 worst class, not on the mean.

@@ -31,13 +31,15 @@ export default function Finding() {
             seventeen languages that is not cleaning, it is a filter. It left{" "}
             <b>0.2% of the characters</b> in the Tamil rows and blanked 98.1% of
             them outright. Across the corpus it destroyed <b>27.5% of the data</b>,
-            and every destroyed row belonged to a non-Latin script.
+            and every destroyed row but one belonged to a non-Latin script.
           </p>
           <p>
-            The model was then asked to separate seventeen languages using
-            training data in which seven of them were empty strings. It scored
-            exactly <b>0%</b> on all seven while reporting 66% overall, because
-            the ten Latin-script languages carried the average. A second bug
+            The blanked rows were then dropped, so the model learned seven of
+            its seventeen languages from between 5 and 78 rows of stray Latin
+            fragments each. It reported 91%, on a test split missing the same rows.
+            Measured on text as typed, it scored 65.8%, and exactly <b>0%</b> on
+            all seven, because the ten Latin-script languages carried the
+            average. A second bug
             hid it further: the app passed raw text straight to a model trained
             on cleaned text, so training and serving never agreed.
           </p>
@@ -71,7 +73,7 @@ export default function Finding() {
             Seven languages scored zero before and none do now. The worst
             language went from 0% to 96.5%. The headline moved from 65.8% to
             99.1%, but that is the least interesting number here: the original
-            66% was not a model that needed improving, it was a pipeline
+            91% was not a model that needed improving, it was a pipeline
             reporting an average over data it had deleted.
           </p>
         </figure>

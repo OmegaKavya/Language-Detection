@@ -9,10 +9,12 @@ with the pipeline around it.
 
 ## The headline number was hiding a total failure
 
-The project reported 66% accuracy. Measured per language on held-out text,
-the deployed model scored **exactly 0.0%** on seven of its seventeen
-languages, across 612 samples. Never once correct, not merely poor. All of
-the 66% came from the ten Latin-script languages.
+The project reported 91% accuracy, measured on a test split from which the
+cleaning step had already removed most of seven languages. Measured per
+language on held-out text as the app received it, the deployed model scored
+65.8% overall and **exactly 0.0%** on seven of its seventeen languages, across
+612 samples. Never once correct, not merely poor. All of the 65.8% came from
+the ten Latin-script languages.
 
 The cause was the cleaning step:
 
@@ -23,7 +25,8 @@ text = re.sub(r'[^a-z\s]', '', text)   # keeps lowercase ASCII, deletes the rest
 On a corpus of seventeen languages that is not a cleaning step, it is a
 filter. It left 0.2% of the characters in the Tamil rows and blanked 98.1% of
 them outright. Across the corpus it destroyed **27.5% of the data**, and every
-destroyed row belonged to a non-Latin script.
+destroyed row but one (a Spanish row reading "(2008).") belonged to a
+non-Latin script.
 
 | | rows blanked | characters surviving |
 | --- | ---: | ---: |
@@ -67,7 +70,7 @@ its own version of the app handed it.
 | **Worst language** | **0.0%** | **96.5%** |
 | **Overall** | **65.8%** | **99.1%** |
 
-Overall accuracy is the least interesting number here. The original 66% was
+Overall accuracy is the least interesting number here. The original 91% was
 not a model that needed improving, it was a pipeline reporting an average over
 data it had deleted.
 

@@ -5,11 +5,12 @@ lowercase ASCII letters. For a dataset of seventeen languages that is not a
 cleaning step, it is a filter: it removed 98.1% of Tamil rows, 96.2% of
 Kannada, 95.6% of Malayalam, 92.7% of Arabic, 89.0% of Greek, 85.4% of
 Russian and 79.4% of Hindi, leaving empty strings behind. 27.5% of the corpus
-became blank, and every blanked row belonged to a non-Latin script.
+became blank, and every blanked row but one (a Spanish row reading "(2008).")
+belonged to a non-Latin script.
 
-The model was then trained with no trace of those seven scripts, so it
-scored exactly 0% on all of them while reporting 66% overall, because the
-ten Latin-script languages carried the average.
+The blank rows were then dropped, so the model was trained with almost nothing
+of those seven scripts. It reported 91% on a test split missing the same rows,
+and scored exactly 0% on all seven, 65.8% overall, on text as typed.
 
 str.isalpha is Unicode aware, so the rule below keeps letters in any script
 and still drops digits, punctuation and symbols.

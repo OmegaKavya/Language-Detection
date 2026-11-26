@@ -20,7 +20,7 @@ mostly n-grams seen a handful of times. It also makes the model small enough
 to export and run in a browser, which is how it is served.
 
 Overall accuracy is reported last and on purpose. The original model reported
-66% while scoring zero on seven of its seventeen languages, so the headline
+91% while scoring zero on seven of its seventeen languages, so the headline
 number was the thing hiding the fault.
 """
 import os

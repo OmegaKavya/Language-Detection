@@ -161,7 +161,7 @@ export default function Detector({ model, detect }) {
               </p>
               {kept !== null && (
                 <p className={`legacy-text${legacy ? "" : " empty"}`}>
-                  {legacy || "Nothing: an empty string."}
+                  {legacy || "Nothing: an empty string, and the row was then dropped from training altogether."}
                 </p>
               )}
               <p className="evidence-note">

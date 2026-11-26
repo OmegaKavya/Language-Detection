@@ -1,6 +1,6 @@
 """What the model must still do, per language rather than on average.
 
-The original model reported 66% while scoring exactly zero on seven of its
+The original model reported 91% while scoring exactly zero on seven of its
 seventeen languages. An aggregate assertion would have passed. These assert a
 floor on every class.
 """
