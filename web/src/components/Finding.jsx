@@ -3,8 +3,11 @@ import Panel from "./Panel.jsx";
 import { label } from "../labels";
 import "./Finding.css";
 
-// Measured end to end on the same held-out rows, each model given exactly
-// what its own version of the app handed it.
+// Measured end to end on one split, each model given exactly what its own
+// version of the app handed it: a stratified 20% of the deduplicated raw CSV,
+// before any cleaning, random_state=42, 2,054 rows. It is not train_model.py's
+// split and overlaps both training sets; ARCHITECTURE.md, Evaluation, has the
+// counts. Change these with the README table.
 const ROWS = [
   ["Tamil", 93, 0.0, 100.0], ["Kannada", 73, 0.0, 100.0],
   ["Malayalam", 118, 0.0, 100.0], ["Arabic", 106, 0.0, 100.0],
@@ -37,7 +40,8 @@ export default function Finding() {
             The blanked rows were then dropped, so the model learned seven of
             its seventeen languages from between 5 and 78 rows of stray Latin
             fragments each. It reported 91%, on a test split missing the same rows.
-            Measured on text as typed, it scored 65.8%, and exactly <b>0%</b> on
+            Measured on a fifth of the raw dataset, 2,054 rows given to it as
+            typed, it scored 65.8%, and exactly <b>0%</b> on
             all seven, because the ten Latin-script languages carried the
             average. A second bug
             hid it further: the app passed raw text straight to a model trained
@@ -55,7 +59,7 @@ export default function Finding() {
         </div>
 
         <figure className="finding-table">
-          <figcaption>Per language, before and after</figcaption>
+          <figcaption>Per language, before and after, on the same 2,054 rows</figcaption>
           <div className="ft-head"><span>Language</span><span>before</span><span>after</span></div>
           <ul>
             {ROWS.map(([name, n, before, after]) => (

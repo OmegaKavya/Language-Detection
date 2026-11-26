@@ -14,7 +14,7 @@ alpha=0.01 reduces that smoothing. At the default of 1.0 the same collapse
 happens more mildly.
 
 max_features=20000 caps the vocabulary. It was measured against the full
-44,157 features and is not a compromise: it scores slightly higher overall
+49,618 features and is not a compromise: it scores slightly higher overall
 and raises the worst class from 94.1% to 96.5%, because the discarded tail is
 mostly n-grams seen a handful of times. It also makes the model small enough
 to export and run in a browser, which is how it is served.

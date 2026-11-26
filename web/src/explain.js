@@ -86,18 +86,31 @@ export function highlightRuns(cleaned, evidence, top = 6) {
 // and Kannada are left out because Intl.Segmenter does not join them either,
 // and the fallback should mark the same characters the browser would.
 const LINKER = String.raw`\u094D\u09CD\u0ACD\u0B4D\u0C4D\u0D4D`;
+// Only consonants of those six scripts join across a virama (InCB=Consonant).
+// A vowel after a virama starts its own cluster, as in Malayalam "എസ്എം", and
+// so does a Latin letter in mixed text.
+const CONSONANT = String.raw`\u0915-\u0939\u0958-\u095F\u0978-\u097F` +
+  String.raw`\u0995-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09DC\u09DD\u09DF\u09F0\u09F1` +
+  String.raw`\u0A95-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0AF9` +
+  String.raw`\u0B15-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B5C\u0B5D\u0B5F\u0B71` +
+  String.raw`\u0C15-\u0C28\u0C2A-\u0C39\u0C58-\u0C5A\u0D15-\u0D3A`;
+// What may sit between two joined consonants besides the virama: a nasal
+// sign or nukta, or a zero width joiner, but not a spacing vowel sign or a
+// zero width non-joiner, either of which ends the conjunct.
+const JOIN_EXTEND = String.raw`(?:(?!\u200C)[\p{Grapheme_Extend}\u200D])`;
 // A zero width joiner, like a mark, belongs to the character before it.
 const EXTEND = String.raw`\p{M}\u200D`;
-const CLUSTER = new RegExp(
-  String.raw`[^${EXTEND}][${EXTEND}]*(?:(?<=[${LINKER}]\u200D?)\p{L}[${EXTEND}]*)*|[${EXTEND}]+`, "gu");
+const CLUSTER = new RegExp(String.raw`[^${EXTEND}][${EXTEND}]*` +
+  String.raw`(?:(?<=[${CONSONANT}]${JOIN_EXTEND}*[${LINKER}]${JOIN_EXTEND}*)[${CONSONANT}][${EXTEND}]*)*` +
+  String.raw`|[${EXTEND}]+`, "gu");
 
 function graphemes(text) {
   if (typeof Intl !== "undefined" && Intl.Segmenter) {
     return Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text), (g) => g.segment);
   }
-  // A mark stays with the letter before it, a virama also takes the
-  // consonant after it (so "क्ष" is one cluster, not "क्" and "ष"), and only
-  // a mark with no letter before it stands alone.
+  // A mark stays with the letter before it, a virama after a consonant also
+  // takes the consonant after it (so "क्ष" is one cluster, not "क्" and "ष"),
+  // and only a mark with no letter before it stands alone.
   return text.match(CLUSTER) || [];
 }
 

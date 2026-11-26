@@ -11,10 +11,12 @@ with the pipeline around it.
 
 The project reported 91% accuracy, measured on a test split from which the
 cleaning step had already removed most of seven languages. Measured per
-language on held-out text as the app received it, the deployed model scored
-65.8% overall and **exactly 0.0%** on seven of its seventeen languages, across
-612 samples. Never once correct, not merely poor. All of the 65.8% came from
-the ten Latin-script languages.
+language on 2,054 rows taken before any cleaning (a stratified 20% of the
+deduplicated raw dataset, `random_state=42`), each given to the model exactly
+as the app received it, the deployed model scored 65.8% overall and
+**exactly 0.0%** on seven of its seventeen languages, all 612 rows written in
+them. Never once correct, not merely poor. All of the 65.8% came from the ten
+Latin-script languages.
 
 The cause was the cleaning step:
 
@@ -58,8 +60,13 @@ non-Latin script.
 
 ## Results
 
-Measured end to end on the same held-out rows, each model given exactly what
-its own version of the app handed it.
+Measured end to end on those same 2,054 raw rows, each model given exactly
+what its own version of the app handed it. Neither model was trained on this
+split, so the rows are not fully held out from either: 1,225 of them were in
+the original model's training data, which flatters the before column, and 365
+in the new one's. On the 2,053 rows of `train_model.py`'s own test split,
+which the new model never trained on, it scores 99.1% overall and 96.5% on its
+worst language.
 
 | | before | after |
 | --- | ---: | ---: |
@@ -75,21 +82,22 @@ not a model that needed improving, it was a pipeline reporting an average over
 data it had deleted.
 
 Logistic regression and a linear SVM were fitted on the same features to check
-that naive Bayes was not the limitation. All three landed within a tenth of a
-point, so the model family was never the problem.
+that naive Bayes was not the limitation. Both scored below it, 98.5% and 98.8%
+against 99.1%, so the model family was never the problem.
 
 ## No server
 
 A TF-IDF character n-gram vectoriser followed by multinomial naive Bayes is a
 sparse dot product and an argmax, so the trained pipeline is exported to
 20,000 terms and reimplemented in JavaScript. It agrees with scikit-learn on
-every one of 2,053 held-out rows, with probabilities matching to 1.9e-7.
+every one of the 2,053 rows in `train_model.py`'s test split, with
+probabilities matching to 1.9e-7.
 
 The page therefore has no backend: no cold start, no hosting cost, and nothing
 typed into it leaves the browser.
 
 Capping the vocabulary at 20,000 was measured rather than assumed. It scores
-slightly higher than the full 44,157 features and lifts the worst class from
+slightly higher than the full 49,618 features and lifts the worst class from
 94.1% to 96.5%, because the discarded tail is mostly n-grams seen a handful of
 times.
 

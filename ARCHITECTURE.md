@@ -50,14 +50,14 @@ likely a priori.
 
 **alpha=0.01.** At the default of 1.0 the same collapse happens, more mildly.
 
-**20,000 features.** Measured against the full 44,157: it scores slightly
+**20,000 features.** Measured against the full 49,618: it scores slightly
 higher overall and raises the worst class from 94.1% to 96.5%, because the
 discarded tail is mostly n-grams seen a handful of times. It also makes the
 model small enough to ship to a browser.
 
 **Naive Bayes, not something larger.** Logistic regression and a linear SVM
-were fitted on the same features and landed within a tenth of a point. The
-model family was never the limitation, so changing it would have disguised a
+were fitted on the same features and both scored below it, 98.5% and 98.8%
+against 99.1%. The model family was never the limitation, so changing it would have disguised a
 pipeline fix as a modelling result.
 
 **No backend.** The model is a sparse dot product and an argmax. Keeping a
@@ -72,8 +72,15 @@ while scoring exactly zero on seven of seventeen languages; an aggregate
 assertion would have passed. `tests/test_model.py` asserts a floor on the
 worst class, not on the mean.
 
-Held-out set is a stratified 20% split at `random_state=42`, so a small class
-like Hindi cannot land mostly on one side.
+Held-out set is a stratified 20% split of the cleaned dataset at
+`random_state=42`, 2,053 rows, so a small class like Hindi cannot land mostly
+on one side. `train_model.py`, the tests and the browser check all use it.
+
+The before and after comparison in the README and on the page uses a
+different split, because the original model has to be given raw text: a
+stratified 20% of the deduplicated raw dataset, before any cleaning, 2,054
+rows. Neither model was trained on that split, so it overlaps both training
+sets, 1,225 rows for the original model and 365 for the new one.
 
 ## Tests
 

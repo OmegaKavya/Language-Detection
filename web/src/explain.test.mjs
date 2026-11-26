@@ -87,6 +87,11 @@ test("without Intl.Segmenter, conjuncts are marked as the browser would mark the
     "க்ஷத்திரியர்", "ஸ்ரீ", "பக்கம்", // Tamil
     "ಕ್ಷತ್ರಿಯ", "ಸ್ತ್ರೀ", "ಪ್ರಕಾಶ", // Kannada
     "ക്ഷത്രിയൻ", "സ്ത്രീ", "ന്‍", "മലയാളം", // Malayalam
+    // From the dataset: a vowel after the virama, and Latin glued to Malayalam.
+    "എസ്എംഎസ്", "ലേർണിങ്machine",
+    // A virama joins only a consonant to a consonant: not after a vowel or a
+    // spacing vowel sign, but across a nukta or nasal sign, and across scripts.
+    "अ्क", "कि्क", "क्\u093Cक", "कं्क", "क्ক",
   ];
   const expected = words.map(markings);
   const segmenter = Intl.Segmenter;

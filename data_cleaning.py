@@ -9,8 +9,9 @@ became blank, and every blanked row but one (a Spanish row reading "(2008).")
 belonged to a non-Latin script.
 
 The blank rows were then dropped, so the model was trained with almost nothing
-of those seven scripts. It reported 91% on a test split missing the same rows,
-and scored exactly 0% on all seven, 65.8% overall, on text as typed.
+of those seven scripts. It reported 91% on a test split missing the same rows.
+Given text as typed, on a stratified fifth of the deduplicated raw rows, it
+scored exactly 0% on all seven and 65.8% overall.
 
 str.isalpha is Unicode aware, so the rule below keeps letters in any script
 and still drops digits, punctuation and symbols.
