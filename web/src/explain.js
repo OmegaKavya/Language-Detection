@@ -1,30 +1,37 @@
 // Helpers that show the detector's reasoning on the text itself.
 
+// Python 3's \s on str, which is str.isspace. JavaScript's \s differs: it
+// leaves out U+001C to U+001F and U+0085 and adds U+FEFF, so the legacy rule
+// spells the class out rather than borrowing JavaScript's.
+const PY_SPACE = String.raw`\t\n\v\f\r\x1c-\x20\x85\xa0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000`;
+const PY_SPACE_RUN = new RegExp(`[${PY_SPACE}]+`, "g");
+const PY_NOT_A_Z_OR_SPACE = new RegExp(`[^a-z${PY_SPACE}]`, "g");
+
 /**
  * The cleaning step this project shipped with, reproduced exactly (commit
  * e33bc56 removed it): lowercase, drop digits, keep only a-z and whitespace,
- * collapse whitespace. Shown beside the current cleaning so a visitor can see
- * what the old model was actually given for their own input.
+ * collapse whitespace. It ran over the whole dataset before the split, so
+ * this is what a sentence became in the original model's training data.
  */
 export function legacyClean(text) {
   return String(text)
     .toLowerCase()
-    .replace(/\d+/g, "")
-    .replace(/[^a-z\s]/g, "")
-    .replace(/\s+/g, " ")
+    .replace(/\p{Nd}+/gu, "")
+    .replace(PY_NOT_A_Z_OR_SPACE, "")
+    .replace(PY_SPACE_RUN, " ")
     .trim();
 }
 
 /**
  * Share of the letters (and the marks attached to them) that the legacy
- * cleaning kept, 0 to 1. Punctuation and digits are not counted: both
- * cleanings drop them, so counting them would blame the old one for losses
- * the new one makes too.
+ * cleaning kept, 0 to 1, or null when there are no letters to keep.
+ * Punctuation and digits are not counted: both cleanings drop them, so
+ * counting them would blame the old one for losses the new one makes too.
  */
 export function legacyKept(text) {
   const letters = (s) => (String(s).match(/[\p{L}\p{M}]/gu) || []).length;
   const total = letters(text);
-  return total === 0 ? 1 : letters(legacyClean(text)) / total;
+  return total === 0 ? null : letters(legacyClean(text)) / total;
 }
 
 /**
@@ -78,7 +85,9 @@ function graphemes(text) {
   if (typeof Intl !== "undefined" && Intl.Segmenter) {
     return Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text), (g) => g.segment);
   }
-  return Array.from(text);
+  // A mark stays with the letter before it; only a mark with no letter
+  // before it stands alone.
+  return text.match(/\P{M}\p{M}*|\p{M}+/gu) || [];
 }
 
 /** True when the top two languages are too close to call with confidence. */

@@ -44,3 +44,34 @@ test("punctuation is not counted as lost letters", () => {
   assert.strictEqual(legacyKept("The park."), 1);
   assert.strictEqual(legacyKept("très"), 0.75);
 });
+
+test("text with no letters has nothing to keep, not 100% kept", () => {
+  assert.strictEqual(legacyKept("2024!"), null);
+  assert.strictEqual(legacyKept("... ???"), null);
+  assert.strictEqual(legacyClean("2024!"), "");
+});
+
+test("the legacy cleaning uses Python's whitespace, not JavaScript's", () => {
+  // Every character Python 3's \s matches on str, which is str.isspace.
+  const python = [0x9, 0xa, 0xb, 0xc, 0xd, 0x1c, 0x1d, 0x1e, 0x1f, 0x20, 0x85, 0xa0, 0x1680,
+    0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200a,
+    0x2028, 0x2029, 0x202f, 0x205f, 0x3000];
+  for (const c of python) {
+    assert.strictEqual(legacyClean(`a${String.fromCodePoint(c)}b`), "a b", `U+${c.toString(16)}`);
+  }
+  // JavaScript's \s matches U+FEFF; Python's does not, so the old rule deleted it.
+  assert.strictEqual(legacyClean("a\ufeffb"), "ab");
+});
+
+test("without Intl.Segmenter, a mark still stays with its letter", () => {
+  const segmenter = Intl.Segmenter;
+  delete Intl.Segmenter;
+  try {
+    const runs = highlightRuns("வணக்கம்", [{ ngram: "\u0BCD", contribution: 1 }]);
+    assert.strictEqual(runs.map((r) => r.text).join(""), "வணக்கம்");
+    assert.deepStrictEqual(runs.filter((r) => r.strength > 0).map((r) => r.text), ["க்", "ம்"]);
+    for (const r of runs) assert.ok(!/^\p{M}/u.test(r.text), `run starts with a bare mark: ${r.text}`);
+  } finally {
+    Intl.Segmenter = segmenter;
+  }
+});

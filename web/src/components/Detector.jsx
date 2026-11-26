@@ -147,16 +147,29 @@ export default function Detector({ model, detect }) {
         <div className="legacy">
           <button type="button" className="legacy-toggle" aria-expanded={showLegacy}
             onClick={() => setShowLegacy((v) => !v)}>
-            {showLegacy ? "Hide" : "Show"} what the original model was given
+            {showLegacy ? "Hide" : "Show"} what the original cleaning made of this
           </button>
           {showLegacy && (
             <div className="legacy-body">
               <p className="evidence-note">
-                The first version cleaned text with <code>re.sub(r'[^a-z\s]', '', text)</code>.
-                For what you typed, it kept <b>{pct(kept)}</b> of the letters.
+                The first version cleaned its training data
+                with <code>re.sub(r'[^a-z\s]', '', text)</code>, before the model
+                ever saw it.{" "}
+                {kept === null
+                  ? "What you typed has no letters, so there is nothing for it to keep or lose."
+                  : <>Had what you typed been a training sentence, it would have kept <b>{pct(kept)}</b> of the letters and become:</>}
               </p>
-              <p className={`legacy-text${legacy ? "" : " empty"}`}>
-                {legacy || "Nothing. The original model was given an empty string, and answered anyway."}
+              {kept !== null && (
+                <p className={`legacy-text${legacy ? "" : " empty"}`}>
+                  {legacy || "Nothing: an empty string."}
+                </p>
+              )}
+              <p className="evidence-note">
+                The original app passed whatever was typed to the model
+                unchanged. The damage was done in training: only the letters a
+                to z survived the cleaning, so the model never saw a single
+                letter of Tamil, Kannada, Malayalam, Arabic, Greek, Russian or
+                Hindi, and scored zero on all seven.
               </p>
             </div>
           )}

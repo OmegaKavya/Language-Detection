@@ -11,7 +11,7 @@ const ROWS = [
   ["Greek", 72, 0.0, 100.0], ["Hindi", 12, 0.0, 100.0],
   ["Russian", 138, 0.0, 98.6], ["Danish", 85, 72.9, 96.5],
   ["German", 93, 84.9, 98.9], ["Dutch", 108, 90.7, 99.1],
-  ["Turkish", 94, 91.5, 100.0], ["Portugeese", 147, 92.5, 98.0],
+  ["Turkish", 94, 91.5, 100.0], ["Portugeese", 147, 92.5, 98.6],
   ["Sweedish", 135, 92.6, 99.3], ["Spanish", 163, 96.9, 98.8],
   ["Italian", 139, 97.8, 100.0], ["French", 201, 98.5, 98.5],
   ["English", 277, 98.9, 98.6],
@@ -65,12 +65,12 @@ export default function Finding() {
             ))}
           </ul>
           <p className="ft-total">
-            <span>Overall</span><span className="ft-val">65.8%</span><span className="ft-val good">98.9%</span>
+            <span>Overall</span><span className="ft-val">65.8%</span><span className="ft-val good">99.1%</span>
           </p>
           <p className="ft-foot">
             Seven languages scored zero before and none do now. The worst
             language went from 0% to 96.5%. The headline moved from 65.8% to
-            98.9%, but that is the least interesting number here: the original
+            99.1%, but that is the least interesting number here: the original
             66% was not a model that needed improving, it was a pipeline
             reporting an average over data it had deleted.
           </p>

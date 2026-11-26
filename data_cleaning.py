@@ -7,8 +7,8 @@ Kannada, 95.6% of Malayalam, 92.7% of Arabic, 89.0% of Greek, 85.4% of
 Russian and 79.4% of Hindi, leaving empty strings behind. 27.5% of the corpus
 became blank, and every blanked row belonged to a non-Latin script.
 
-The model was then asked to tell those seven languages apart from nothing,
-and scored exactly 0% on all of them while reporting 66% overall, because the
+The model was then trained with no trace of those seven scripts, so it
+scored exactly 0% on all of them while reporting 66% overall, because the
 ten Latin-script languages carried the average.
 
 str.isalpha is Unicode aware, so the rule below keeps letters in any script
